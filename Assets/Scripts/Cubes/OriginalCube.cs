@@ -5,22 +5,42 @@ using UnityEngine;
 public class OriginalCube : BaseCube
 {
     [SerializeField] private List<DiseSide> _sidesData;
-    private Dictionary<string, TextMeshProUGUI> _sides = new Dictionary<string, TextMeshProUGUI>();
-    private Dictionary<int, TextMeshProUGUI> _sidesInt = new Dictionary<int, TextMeshProUGUI>();
+    [SerializeField] private Renderer _renderer;
+    [SerializeField] private Material _matInstance;
 
+
+    private float[,] values = new float[6, 6]
+    {
+        //some hardcode. I know, texture is trash, but im lazy
+        //equals material texture offset to top direction
+        //Top     Down    Forward Back    Left    Right   values
+        { 0.330f, 0.834f, 0.500f, 0.167f, 0.667f, 1.000f  }, //1
+        { 0.834f, 0.330f, 1.000f, 0.667f, 0.167f, 0.500f  }, //2
+        { 0.167f, 0.667f, 0.330f, 1.000f, 0.500f, 0.834f  }, //3
+        { 0.500f, 1.000f, 0.667f, 0.330f, 0.834f, 0.167f  }, //4
+        { 0.667f, 0.167f, 0.834f, 0.500f, 1.000f, 0.330f  }, //5
+        { 1.000f, 0.500f, 0.167f, 0.834f, 0.330f, 0.667f  }  //6
+    };
+
+    private Dictionary<string, int> NameToIndex = new Dictionary<string, int>() 
+    {
+        { "Left", 4},
+        { "right", 5},
+        { "down", 1},
+        { "top", 0},
+        { "back", 3},
+        { "forward", 2},
+    };
 
     /// <summary>
     /// Entry point
     /// </summary>
     public void Configure()
     {
-        for (int i = 0; i < _sidesData.Count; i++)
-        {
-            _sides.Add(_sidesData[i].Name, _sidesData[i].Text);
-            _sidesInt.Add(i, _sidesData[i].Text);
-        }
-
+        _matInstance = _renderer.material;
     }
+
+
 
     /// <summary>
     /// Set dots view in dice
@@ -29,26 +49,7 @@ public class OriginalCube : BaseCube
     /// <param name="value"></param>
     public void SetVisualValues(string topName, int value)
     {
-        //better use Texture, but i'm lazy :)
-
-        foreach (var side in _sides)
-        {
-            side.Value.text = " ";
-        }
-
-        _sides[topName].text = value.ToString();
-    }
-
-    public void SetVisualValues(int topId, int value)
-    {
-        //better use Texture, but i'm lazy :)
-
-        foreach (var side in _sidesInt)
-        {
-            side.Value.text = " ";
-        }
-
-        _sidesInt[topId].text = value.ToString();
+        _matInstance.SetFloat("_Offset", values[value - 1, NameToIndex[topName]]);
     }
 }
 
